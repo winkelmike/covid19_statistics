@@ -24,21 +24,21 @@ for csv_file_path in csv_file_path_list:
     sns.set_style("whitegrid")
 
     country_df[cols_plot].plot.area(alpha=0.5, figsize=(11, 9), stacked=False)
-    plt.title("Covid-19 observations in " + country_name + " over time")
+    plt.title(f"Covid-19 observations in {country_name} over time")
     plt.xlabel('Day')
     plt.xticks(dates, labels, rotation=60)
     plt.ylabel('Observations')
 
-    image_name = "observations_in_" + country_name.replace(' ', '_') + '.jpg'
-    file_path_name = IMAGE_PATH + "" + image_name
+    image_name = f"observations_in_{country_name.replace(' ', '_')}.jpg"
+    file_path_name = IMAGE_PATH + image_name
 
-    print('working on: ' + country_name)
+    print(f'working on: {country_name}')
     if os.path.isfile(file_path_name):
         os.remove(file_path_name)
     try:
         plt.savefig(file_path_name)
     except Exception as inst:
         print(inst.args[0])
-        print('ERROR on: ' + country_name)
+        print(f'ERROR on: {country_name}')
 
     plt.close()
