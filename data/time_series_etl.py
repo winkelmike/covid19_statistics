@@ -1,5 +1,7 @@
 import pandas as pd
 from utils import etl_chain
+from data.data_utils import get_country_name_from_df
+from data.enrich_data import match_continent_to_df
 FILE_PATH_SPECIFIC = "data/country_specific/"
 FILE_PATH_ALL_DATA = "data/all_countries/"
 
@@ -33,9 +35,10 @@ def transform_covid_ts(df_dict):
             .groupby(['country']).sum()\
             .reset_index() \
             .melt(id_vars='country', var_name='date', value_name=key)\
-            .set_index(['country','date'])\
+            .set_index(['country', 'date'])\
             .rename(index={'Taiwan*': 'Taiwan'})
-        df_list.append(prepared_df)
+        enriched_prepared_df = enrich_covid_ts_dataframe(prepared_df)
+        df_list.append(enriched_prepared_df)
     result_df = pd.concat(df_list, axis=1, join='inner')
     return result_df
 
@@ -44,15 +47,20 @@ def transform_covid_ts_per_country(long_df):
     """
     Split source DataFrame into several smaller ones grouped by country
     :param long_df: DataFrame of all countries and date
-    :return: dict of several DataFrames by country
+    :return: list of several DataFrames by country
     """
-    country_df_dict = {}
+    country_df_list = []
     for country, df_country in long_df.groupby('country'):
-        country_df_dict[country] = df_country
-    return country_df_dict
+        enriched_prepared_df = enrich_covid_ts_dataframe(df_country)
+        country_df_list.append(enriched_prepared_df)
+    return country_df_list
 
 
-def load_covid_ts(df):
+def enrich_covid_ts_dataframe(df):
+    return etl_chain(df, match_continent_to_df)
+
+
+def load_covid_ts_all_countries(df):
     """
     Output DataFrame to covid_observations_ts.csv
     :param df: DataFrame with observations per date and country
@@ -61,21 +69,22 @@ def load_covid_ts(df):
     df.to_csv(FILE_PATH_ALL_DATA + file_name)
 
 
-def load_covid_ts_per_country(df_dict):
+def load_covid_ts_per_country(df_list):
     """
     Output DataFrames per country to covid_observations_ts_<country name>.csv
-    :param df_dict: Dict per country of DataFrames over date
+    :param df_list: Dict per country of DataFrames over date
     """
-    for key in df_dict:
-        file_name = f"covid_observations_in_{key}.csv"
-        df_dict[key].to_csv(FILE_PATH_SPECIFIC + file_name)
+    for df in df_list:
+        country_name = get_country_name_from_df(df)
+        file_name = f"covid_observations_in_{country_name}.csv"
+        df.to_csv(FILE_PATH_SPECIFIC + file_name)
 
 
 if __name__ == "__main__":
     raw_data = extract_covid_ts()
 
     # observations for all countries and date
-    etl_chain(raw_data, transform_covid_ts, load_covid_ts)
+    etl_chain(raw_data, transform_covid_ts, load_covid_ts_all_countries)
 
     # observations per country
     etl_chain(raw_data, transform_covid_ts, transform_covid_ts_per_country, load_covid_ts_per_country)
