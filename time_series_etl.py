@@ -1,6 +1,7 @@
 import pandas as pd
 from utils import etl_chain
-FILE_PATH = "data/"
+FILE_PATH_SPECIFIC = "data/country_specific/"
+FILE_PATH_ALL_DATA = "data/all_countries/"
 
 
 def extract_covid_ts():
@@ -57,7 +58,7 @@ def load_covid_ts(df):
     :param df: DataFrame with observations per date and country
     """
     file_name = "covid_observations_all.csv"
-    df.to_csv(FILE_PATH + file_name)
+    df.to_csv(FILE_PATH_ALL_DATA + file_name)
 
 
 def load_covid_ts_per_country(df_dict):
@@ -67,7 +68,7 @@ def load_covid_ts_per_country(df_dict):
     """
     for key in df_dict:
         file_name = f"covid_observations_in_{key}.csv"
-        df_dict[key].to_csv(FILE_PATH + file_name)
+        df_dict[key].to_csv(FILE_PATH_SPECIFIC + file_name)
 
 
 if __name__ == "__main__":
