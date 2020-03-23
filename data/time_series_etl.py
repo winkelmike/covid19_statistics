@@ -11,10 +11,10 @@ def extract_covid_ts():
     Load all JHU time series CSV's into local DataFrames
     :return: dict of DataFrames
     """
-    confirmed_df = pd.read_csv(r'source_data/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid'
+    confirmed_df = pd.read_csv(r'data/source_data/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid'
                                r'-Confirmed.csv')
-    deaths_df = pd.read_csv(r'source_data/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv')
-    recovered_df = pd.read_csv(r'source_data/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid'
+    deaths_df = pd.read_csv(r'data/source_data/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv')
+    recovered_df = pd.read_csv(r'data/source_data/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid'
                                r'-Recovered.csv')
     return {'confirmed': confirmed_df, 'deaths': deaths_df, 'recovered': recovered_df}
 

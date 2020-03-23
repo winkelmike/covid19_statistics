@@ -12,5 +12,5 @@ def check_git_status(repo):
 
 
 if __name__ == "__main__":
-    covid_repo = git.Repo("C:\\Users\\mwinkel.DVG\\Desktop\\covid19_statistics\\source_data")
+    covid_repo = git.Repo("data/source_data")
     pull_from_git(covid_repo)
