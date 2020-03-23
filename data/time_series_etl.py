@@ -1,7 +1,7 @@
 import pandas as pd
 from utils import etl_chain
 from data.data_utils import get_country_name_from_df
-from data.enrich_data import match_continent_to_df
+import data.enrich_data as ed
 FILE_PATH_SPECIFIC = "data/country_specific/"
 FILE_PATH_ALL_DATA = "data/all_countries/"
 
@@ -37,8 +37,7 @@ def transform_covid_ts(df_dict):
             .melt(id_vars='country', var_name='date', value_name=key)\
             .set_index(['country', 'date'])\
             .rename(index={'Taiwan*': 'Taiwan'})
-        enriched_prepared_df = enrich_covid_ts_dataframe(prepared_df)
-        df_list.append(enriched_prepared_df)
+        df_list.append(prepared_df)
     result_df = pd.concat(df_list, axis=1, join='inner')
     return result_df
 
@@ -51,13 +50,15 @@ def transform_covid_ts_per_country(long_df):
     """
     country_df_list = []
     for country, df_country in long_df.groupby('country'):
-        enriched_prepared_df = enrich_covid_ts_dataframe(df_country)
-        country_df_list.append(enriched_prepared_df)
+        country_df_list.append(df_country)
     return country_df_list
 
 
 def enrich_covid_ts_dataframe(df):
-    return etl_chain(df, match_continent_to_df)
+    return etl_chain(df,
+                     ed.match_iso_and_continent_to_df,
+                     # ed.match_government_measures_to_df # TODO activate when done
+                     )
 
 
 def load_covid_ts_all_countries(df):
@@ -84,7 +85,14 @@ if __name__ == "__main__":
     raw_data = extract_covid_ts()
 
     # observations for all countries and date
-    etl_chain(raw_data, transform_covid_ts, load_covid_ts_all_countries)
+    etl_chain(raw_data,
+              transform_covid_ts,
+              enrich_covid_ts_dataframe,
+              load_covid_ts_all_countries)
 
     # observations per country
-    etl_chain(raw_data, transform_covid_ts, transform_covid_ts_per_country, load_covid_ts_per_country)
+    etl_chain(raw_data,
+              transform_covid_ts,
+              enrich_covid_ts_dataframe,
+              transform_covid_ts_per_country,
+              load_covid_ts_per_country)
