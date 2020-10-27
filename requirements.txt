@@ -15,7 +15,7 @@ click==7.1.1
 colorama==0.4.3
 colorlog==4.1.0
 coverage==5.0.4
-cryptography==2.8
+cryptography==3.2
 cycler==0.10.0
 decorator==4.4.2
 dnspython==1.16.0
